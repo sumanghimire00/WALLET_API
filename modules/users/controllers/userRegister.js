@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt =require("bcrypt");
 
 
 
@@ -9,13 +10,13 @@ const userRegister = async (req, res) => {
     // validation
 
     // Creation code for user
-
+    const encPassword =await bcrypt.hash(password,10);
     try{
 
         const createUser = await Users.create({
             name,
             email,
-            password,
+            password:encPassword, 
             address,
             balance,
     
