@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:[true,"Email is required"],
+        unique: true,
         
     },
     password:{
@@ -21,8 +22,16 @@ const userSchema = new mongoose.Schema({
         type:String,
         
     },
+    balance:{
+        type:Number,
+        required: [true,"Balance is required"],
+    },
 
-});
+},
+{
+    timestamps: true,
+}
+);
 
 const userModel =mongoose.model("users",userSchema);
 

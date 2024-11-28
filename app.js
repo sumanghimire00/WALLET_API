@@ -7,6 +7,8 @@ require("dotenv").config();
 
 
 const app = express();
+// For json Use
+app.use(express.json());
 
 // Models
 
@@ -19,14 +21,11 @@ mongoose.connect(process.env.mongo_connect, {}).then(() => {
     console.log("Failed to connect mongodb", e);
 });
 
-
-
- 
-
-
 // Routes
 
 app.use("/users",userRouter);
+
+
 
 
 app.listen(8000, () => {
