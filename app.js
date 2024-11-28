@@ -8,12 +8,21 @@ require("dotenv").config();
 
 const app = express();
 
+// Models
+
+require("./models/users.model");
+
 mongoose.connect(process.env.mongo_connect, {}).then(() => {
     console.log("Connected to mongodb sucessfully!");
 
 }).catch((e) => {
     console.log("Failed to connect mongodb", e);
 });
+
+
+
+ 
+
 
 // Routes
 
