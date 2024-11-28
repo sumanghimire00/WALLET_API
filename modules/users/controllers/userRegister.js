@@ -5,9 +5,9 @@ const bcrypt =require("bcrypt");
 
 const userRegister = async (req, res) => {
     const Users = mongoose.model("users");
-    const { name, email, password, address, balance } = req.body;
-
+    
     // validation
+    const { name, email, password, address, balance } = req.body;
 
     // Creation code for user
     const encPassword =await bcrypt.hash(password,10);
