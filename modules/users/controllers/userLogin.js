@@ -43,7 +43,7 @@ const userLogin =async(req,res)=>{
         email:getUserForAccessToken.email,
         name: getUserForAccessToken.name,
     },
-   process.jwt_salt,{
+   process.env.jwt_salt,{
     expiresIn:"90 days"
    },
 );
