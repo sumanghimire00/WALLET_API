@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRouter = require("./modules/users/users.routes");
+const incomeRouter = require("./modules/income/income.routes");
 
 
 require("dotenv").config();
@@ -24,6 +25,7 @@ mongoose.connect(process.env.mongo_connect, {}).then(() => {
 // Routes
 
 app.use("/users",userRouter);
+app.use("/income",incomeRouter);
 
 
 
