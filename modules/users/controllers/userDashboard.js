@@ -1,17 +1,26 @@
 const mongoose = require("mongoose");
-const userDashboard = async(req, res) => {
+const userDashboard = async (req, res) => {
 
-    const User =mongoose.model("users");
+    const User = mongoose.model("users");
+    const Transaction = mongoose.model("transactions");
 
-    const getUserData =await User.findOne({
+    const getUserData = await User.findOne({
         _id: req.user._id,
     }).select("balance name");
 
-    console.log(req.user);
+    const getTransactions = await Transaction.find({
+        user_id: req.user._id,
+    }).sort("-createdAt")
+        .select("remarks amount transaction_type")
+        .limit(5);
+
+
+
     res.status(200).json({
         data: getUserData,
+        transactions: getTransactions,
     });
-    
+
 };
 
 module.exports = userDashboard;

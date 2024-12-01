@@ -2,11 +2,12 @@
 const mongoose = require("mongoose");
 const addExpense = async (req, res) => {
     const Users = mongoose.model("users");
+    const Transaction = mongoose.model("transactions");
 
 
     const { amount, remarks } = req.body;
 
-  // Sucess.......................
+    // Sucess.......................
     try {
         if (!amount) throw "Please enter amount";
         if (amount < 1) throw "Amount must be more than 1";
@@ -21,18 +22,39 @@ const addExpense = async (req, res) => {
         });
         return;
     };
+    // sucesss.......
 
-    await Users.updateOne({
-        _id: req.user._id,
-    },
-        {
-            $inc:{
-                balance: amount *-1,
-            }
-        }, {
-        runValidators: true,
-    },
-    );
+    try {
+
+        await Users.updateOne({
+            _id: req.user._id,
+        },
+            {
+                $inc: {
+                    balance: amount * -1,
+                }
+            }, {
+            runValidators: true,
+        },
+        );
+
+        await Transaction.create({
+            user_id: req.user._id,
+            transaction_type: "expense",
+            remarks: remarks,
+            amount: amount,
+        })
+
+    }
+    catch (e) {
+        res.status(400).json({
+            status: "failed",
+            message: e.message,
+        });
+        return;
+    };
+
+
 
     res.status(200).json({
         status: "Expenses was added",

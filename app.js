@@ -15,6 +15,7 @@ app.use(express.json());
 // Models
 
 require("./models/users.model");
+require("./models/transaction.model");
 
 mongoose.connect(process.env.mongo_connect, {}).then(() => {
     console.log("Connected to mongodb sucessfully!");
