@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const userRouter = require("./modules/users/users.routes");
 const incomeRouter = require("./modules/income/income.routes");
 const expenseRouter = require("./modules/expenses/expense.routes");
-
+const cors =require("cors");
 
 require("dotenv").config();
 
@@ -11,6 +11,14 @@ require("dotenv").config();
 const app = express();
 // For json Use
 app.use(express.json());
+
+// / Enable CORS to allow frontend to communicate with backend
+app.use(cors({
+    origin:"*",
+    methods :"GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type, Authorization"
+}));
+
 
 // Models
 
