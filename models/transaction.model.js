@@ -1,31 +1,31 @@
-const mongoose = require("mongoose");
-
-
-const transactionSchema = new mongoose.Schema(
-    {
+module.exports = (sequelize, Sequelize) => {
+    const Transaction = sequelize.define("transaction", {
+        id: {
+            type: Sequelize.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
         amount: {
-            type: Number,
-            required: [true, "Amount is required"],
+            type: Sequelize.DECIMAL(10, 2),
+            allowNull: false
         },
         remarks: {
-            type: String,
-            required: [true, "Remarks is required"],
-        },
-        user_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
-            required: true,
+            type: Sequelize.STRING,
+            allowNull: false
         },
         transaction_type: {
-            type: String,
-            enum:["income","expense"],
-            required: [true, "Type is required"],
+            type: Sequelize.ENUM('income', 'expense'),
+            allowNull: false
         },
-    },
-    {
-        timestamps: true,
-    },
-);
+        user_id: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'id'
+            }
+        }
+    });
 
-const transcationModel = mongoose.model("transactions", transactionSchema);
-module.exports = transcationModel; 
+    return Transaction;
+};

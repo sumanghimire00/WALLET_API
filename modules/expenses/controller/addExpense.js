@@ -1,64 +1,53 @@
+const db = require("../../../models");
 
-const mongoose = require("mongoose");
 const addExpense = async (req, res) => {
-    const Users = mongoose.model("users");
-    const Transaction = mongoose.model("transactions");
-
-
+    const User = db.users;
+    const Transaction = db.transactions;
     const { amount, remarks } = req.body;
 
-    // Sucess.......................
     try {
-        if (!amount) throw "Please enter amount";
-        if (amount < 1) throw "Amount must be more than 1";
+        if (!amount) throw new Error("Please enter amount");
+        if (amount < 1) throw new Error("Amount must be more than 1");
 
-        if (!remarks) throw "Remarks is required";
-        if (remarks.length < 2) throw "Remarks must be atleast to be 2 char";
-    }
-    catch (e) {
-        res.status(400).json({
-            status: "failed",
-            message: e,
+        if (!remarks) throw new Error("Remarks is required");
+        if (remarks.length < 2) throw new Error("Remarks must be at least two characters");
+
+        // Transaction block to ensure consistency
+        const result = await db.sequelize.transaction(async (t) => {
+            const user = await User.findByPk(req.user.id, { transaction: t });
+            
+            // Optional: you might not want to restrict negative balance but logically it makes sense
+            // if (user.balance < amount) {
+            //     throw new Error("Insufficient balance");
+            // }
+
+            await User.decrement('balance', {
+                by: amount,
+                where: { id: req.user.id },
+                transaction: t
+            });
+
+            const newTransaction = await Transaction.create({
+                amount: amount,
+                remarks: remarks,
+                user_id: req.user.id,
+                transaction_type: "expense",
+            }, { transaction: t });
+
+            return newTransaction;
         });
-        return;
-    };
-    // sucesss.......
 
-    try {
-
-        await Users.updateOne({
-            _id: req.user._id,
-        },
-            {
-                $inc: {
-                    balance: amount * -1,
-                }
-            }, {
-            runValidators: true,
-        },
-        );
-
-        await Transaction.create({
-            user_id: req.user._id,
-            transaction_type: "expense",
-            remarks: remarks,
-            amount: amount,
-        })
-
-    }
-    catch (e) {
+        res.status(200).json({
+            status: "success",
+            message: "Expense was added",
+            data: result
+        });
+    } catch (e) {
         res.status(400).json({
             status: "failed",
             message: e.message,
         });
-        return;
-    };
-
-
-
-    res.status(200).json({
-        status: "Expenses was added",
-    });
+    }
 };
 
 module.exports = addExpense;

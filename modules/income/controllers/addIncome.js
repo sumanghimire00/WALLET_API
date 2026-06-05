@@ -1,64 +1,46 @@
+const db = require("../../../models");
 
-const mongoose = require("mongoose");
 const addIncome = async (req, res) => {
-    const Users = mongoose.model("users");
-    const Transaction = mongoose.model("transactions");
-
+    const User = db.users;
+    const Transaction = db.transactions;
     const { amount, remarks } = req.body;
 
     try {
-        if (!amount) throw "Please enter amount";
-        if (amount < 1) throw "Amount must be more than 1";
+        if (!amount) throw new Error("Please enter amount");
+        if (amount < 1) throw new Error("Amount must be more than 1");
 
-        if (!remarks) throw "Remarks is required";
-        if (remarks.length < 2) throw "Remarks must be atleast be two char";
+        if (!remarks) throw new Error("Remarks is required");
+        if (remarks.length < 2) throw new Error("Remarks must be at least two characters");
 
+        // Transaction block to ensure consistency
+        const result = await db.sequelize.transaction(async (t) => {
+            const newTransaction = await Transaction.create({
+                amount: amount,
+                remarks: remarks,
+                user_id: req.user.id,
+                transaction_type: "income",
+            }, { transaction: t });
+
+            await User.increment('balance', {
+                by: amount,
+                where: { id: req.user.id },
+                transaction: t
+            });
+            
+            return newTransaction;
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Income was added",
+            data: result
+        });
     } catch (e) {
         res.status(400).json({
-            status: "failed!",
-            message: e,
+            status: "failed",
+            message: e.message,
         });
-        return;
-    };
-
-    // Sucess.......................
-
-    try {
-        await Transaction.create({
-            amount: amount,
-            remarks: remarks,
-            user_id: req.user._id,
-            transaction_type:"income",
-        },);
-
-        await Users.updateOne({
-            _id: req.user._id,
-        }, {
-
-            $inc: {
-                balance: amount,
-            }
-        }, {
-            runValidators: true,
-        },
-
-        );
-        // Create transaction history.......
-
-        
-
     }
-        catch (e) {
-            res.status(400).json({
-                status: "failed!",
-                message: e.message,
-            });
-            return;
-        }
-    
-    res.status(200).json({
-        status: "Income was added",
-    });
 };
 
 module.exports = addIncome;

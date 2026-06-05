@@ -1,38 +1,39 @@
-const mongoose = require("mongoose");
-const bcrypt =require("bcrypt");
-
-
+const db = require("../../../models");
+const bcrypt = require("bcrypt");
 
 const userRegister = async (req, res) => {
-    const Users = mongoose.model("users");
+    const User = db.users;
     
     // validation
     const { name, email, password, address, balance } = req.body;
 
-    // Creation code for user
-    const encPassword =await bcrypt.hash(password,10);
-    try{
-
-        const createUser = await Users.create({
-            name,
-            email,
-            password:encPassword, 
-            address,
-            balance,
-    
+    if (!name || !email || !password || balance === undefined) {
+        return res.status(400).json({
+            status: "failed",
+            message: "Please provide all required fields"
         });
     }
-    catch(e){
-        res.status(400).json({
-            status:"failed!",
-            message:e.message,
-        });
-        return
-    };
 
-    res.status(200).json({
-        status: "Hello Register",
-    });
+    try {
+        const encPassword = await bcrypt.hash(password, 10);
+        await User.create({
+            name,
+            email,
+            password: encPassword,
+            address,
+            balance: balance || 0,
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "User registered successfully"
+        });
+    } catch (e) {
+        res.status(400).json({
+            status: "failed!",
+            message: e.message,
+        });
+    }
 };
 
 module.exports = userRegister;
